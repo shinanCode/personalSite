@@ -1,11 +1,418 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora — 独立数字产品工作室</title>
+<meta name="description" content="Aurora 是一支小而专注的设计与工程团队，为创业公司与成熟品牌构建设计系统、网站与产品界面。">
+<style>
+  :root{
+    --paper:#f6f2ea;
+    --paper-2:#efe9df;
+    --ink:#14130f;
+    --ink-soft:#4a463d;
+    --line:rgba(20,19,15,.14);
+    --accent:#d9481c;
+    --accent-soft:#f0d9cd;
+    --radius:14px;
+    --max:1180px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--accent);color:var(--paper)}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  .serif{font-family:"Iowan Old Style","Palatino Linotype","Songti SC","Noto Serif SC",Georgia,serif}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 32px}
+
+  /* ---------- progress ---------- */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:100;transition:width .1s linear}
+
+  /* ---------- nav ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:90;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    background:color-mix(in srgb,var(--paper) 78%,transparent);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s var(--ease),background .3s var(--ease);
+  }
+  header.scrolled{border-bottom-color:var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.02em}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .nav-links{display:flex;gap:34px;align-items:center}
+  .nav-links a{font-size:14px;color:var(--ink-soft);position:relative;padding:4px 0;transition:color .2s}
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--ink);transition:width .3s var(--ease)}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a:hover::after{width:100%}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:999px;
+    font-size:14px;font-weight:500;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    transition:transform .25s var(--ease),background .25s,color .25s;cursor:pointer;
+  }
+  .btn:hover{background:transparent;color:var(--ink);transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--paper)}
+  .btn .arrow{transition:transform .25s var(--ease)}
+  .btn:hover .arrow{transform:translate(3px,-3px)}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:172px 0 96px;overflow:hidden}
+  .hero-bg{
+    position:absolute;inset:-20% -10% auto auto;width:760px;height:760px;pointer-events:none;
+    background:
+      radial-gradient(circle at 30% 30%,rgba(217,72,28,.16),transparent 58%),
+      radial-gradient(circle at 68% 64%,rgba(94,124,100,.18),transparent 60%);
+    filter:blur(10px);opacity:.9;
+  }
+  .hero .kicker{display:flex;align-items:center;gap:12px;color:var(--ink-soft);margin-bottom:28px}
+  .hero .kicker .line{width:44px;height:1px;background:var(--ink-soft)}
+  h1{
+    font-size:clamp(2.6rem,7vw,5.4rem);
+    line-height:1.08;letter-spacing:-.02em;font-weight:400;max-width:15ch;
+  }
+  h1 em{font-style:italic;color:var(--accent)}
+  .hero p.lede{margin-top:30px;max-width:52ch;font-size:clamp(1rem,1.4vw,1.14rem);color:var(--ink-soft)}
+  .hero-actions{display:flex;gap:14px;margin-top:42px;flex-wrap:wrap}
+  .stats{display:flex;gap:56px;margin-top:88px;padding-top:28px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .stat .num{font-size:clamp(1.8rem,3vw,2.6rem);line-height:1;letter-spacing:-.02em}
+  .stat .num sup{font-size:.42em;color:var(--accent);vertical-align:super;margin-left:2px}
+  .stat .lbl{margin-top:8px;color:var(--ink-soft)}
+
+  /* ---------- marquee ---------- */
+  .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;padding:20px 0;background:var(--paper-2)}
+  .marquee-track{display:flex;gap:0;width:max-content;animation:scroll 32s linear infinite}
+  .marquee:hover .marquee-track{animation-play-state:paused}
+  .marquee span{display:flex;align-items:center;gap:26px;padding:0 26px;font-family:"Iowan Old Style","Songti SC",Georgia,serif;font-size:22px;white-space:nowrap;color:var(--ink-soft)}
+  .marquee span::after{content:"✳";font-size:14px;color:var(--accent)}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  /* ---------- section shell ---------- */
+  section{padding:110px 0}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin-bottom:56px;flex-wrap:wrap}
+  .sec-head .label{display:flex;align-items:center;gap:12px;color:var(--ink-soft)}
+  .sec-head .label .idx{color:var(--accent)}
+  h2{font-size:clamp(1.9rem,4vw,3rem);line-height:1.16;letter-spacing:-.015em;font-weight:400;max-width:18ch}
+  .sec-head p{max-width:36ch;color:var(--ink-soft);font-size:15px}
+
+  /* ---------- work ---------- */
+  .work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px}
+  .card{
+    position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
+    background:var(--paper-2);transition:transform .45s var(--ease),box-shadow .45s var(--ease);
+    display:flex;flex-direction:column;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 26px 50px -30px rgba(20,19,15,.45)}
+  .card .art{position:relative;aspect-ratio:16/10;overflow:hidden}
+  .card .art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(20,19,15,.28))}
+  .card .art .glyph{
+    position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.9);
+    font-family:"Iowan Old Style",Georgia,serif;font-size:clamp(2rem,5vw,3.4rem);letter-spacing:.04em;
+    transform:translateY(6px);transition:transform .5s var(--ease);
+  }
+  .card:hover .art .glyph{transform:translateY(0) scale(1.04)}
+  .art-a{background:radial-gradient(120% 120% at 18% 12%,#3a4a63 0%,#16202f 55%,#0d131c 100%)}
+  .art-b{background:radial-gradient(120% 120% at 82% 10%,#8b74c9 0%,#4a3a78 52%,#241c3f 100%)}
+  .art-c{background:radial-gradient(120% 120% at 20% 80%,#e2b07a 0%,#b3703f 48%,#5f3320 100%)}
+  .art-d{background:radial-gradient(120% 120% at 78% 78%,#7fae8c 0%,#3f6f57 50%,#1b3529 100%)}
+  .card .meta{padding:24px 26px 26px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+  .card h3{font-size:1.28rem;font-weight:500;letter-spacing:-.01em}
+  .card .tags{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .card .tag{font-size:11px;letter-spacing:.06em;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-soft)}
+  .card .yr{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-soft);padding-top:6px;white-space:nowrap}
+  .card .go{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(246,242,234,.9);color:var(--ink);opacity:0;transform:translateY(-6px);transition:.35s var(--ease)}
+  .card:hover .go{opacity:1;transform:translateY(0)}
+
+  /* ---------- services ---------- */
+  .services{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+  .svc{padding:34px 30px 38px;border-right:1px solid var(--line);transition:background .35s var(--ease)}
+  .svc:last-child{border-right:0}
+  .svc:hover{background:var(--paper)}
+  .svc .n{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);letter-spacing:.12em}
+  .svc h3{margin:20px 0 12px;font-size:1.3rem;font-weight:500}
+  .svc p{color:var(--ink-soft);font-size:15px}
+  .svc ul{margin-top:20px;list-style:none;display:grid;gap:8px}
+  .svc li{font-size:14px;color:var(--ink-soft);display:flex;gap:10px}
+  .svc li::before{content:"—";color:var(--accent)}
+
+  /* ---------- about ---------- */
+  .about-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+  .about-grid h2{margin-bottom:26px}
+  .about-grid p{color:var(--ink-soft);margin-bottom:18px;max-width:46ch}
+  .about-quote{
+    border-left:2px solid var(--accent);padding:8px 0 8px 22px;margin-top:30px;
+    font-family:"Iowan Old Style","Songti SC",Georgia,serif;font-size:1.22rem;line-height:1.6;
+  }
+  .about-visual{position:relative;aspect-ratio:1/1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(120% 120% at 70% 20%,#f1d3c1 0%,#e0b79f 38%,#c98f6e 72%,#a8654a 100%)}
+  .about-visual .ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.35)}
+  .about-visual .r1{inset:12%}
+  .about-visual .r2{inset:26%}
+  .about-visual .r3{inset:40%}
+  .about-visual .core{position:absolute;inset:44%;border-radius:50%;background:var(--ink);opacity:.9}
+  .about-visual .caption{position:absolute;left:22px;bottom:20px;color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;mix-blend-mode:difference}
+
+  /* ---------- contact ---------- */
+  .contact{padding:130px 0 120px;border-top:1px solid var(--line);text-align:center;position:relative;overflow:hidden}
+  .contact .glow{position:absolute;left:50%;top:40%;width:620px;height:620px;transform:translate(-50%,-50%);
+    background:radial-gradient(circle,rgba(217,72,28,.18),transparent 62%);pointer-events:none}
+  .contact h2{font-size:clamp(2.2rem,6vw,4.2rem);max-width:none;margin:22px auto 18px;letter-spacing:-.02em}
+  .contact p{color:var(--ink-soft);max-width:44ch;margin:0 auto}
+  .contact .cta-row{display:flex;gap:14px;justify-content:center;margin-top:42px;flex-wrap:wrap}
+  .mail{font-family:"Iowan Old Style",Georgia,serif;font-size:clamp(1.1rem,2.2vw,1.55rem);border-bottom:1px solid var(--line);padding-bottom:4px;transition:border-color .3s}
+  .mail:hover{border-color:var(--accent)}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;color:var(--ink-soft);font-size:13px}
+  .foot .links{display:flex;gap:24px}
+  .foot a:hover{color:var(--ink)}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+
+  @media (max-width:900px){
+    .work-grid{grid-template-columns:1fr}
+    .svc-grid{grid-template-columns:1fr}
+    .svc{border-right:0;border-bottom:1px solid var(--line)}
+    .svc:last-child{border-bottom:0}
+    .about-grid{grid-template-columns:1fr;gap:40px}
+    .nav-links{display:none}
+    .stats{gap:34px}
+    .hero{padding-top:140px}
+    .wrap{padding:0 22px}
+    section{padding:80px 0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .marquee-track{animation:none}
+    .reveal{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+  }
+</style>
 </head>
 <body>
-    
+
+<div class="progress" id="progress"></div>
+
+<header id="header">
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="dot"></span>AURORA</a>
+    <nav class="nav-links">
+      <a href="#work">作品</a>
+      <a href="#services">服务</a>
+      <a href="#about">关于</a>
+      <a href="#contact">联系</a>
+    </nav>
+    <a class="btn ghost" href="#contact">聊聊你的项目 <span class="arrow">↗</span></a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="wrap">
+      <div class="kicker mono reveal"><span class="line"></span>独立数字产品工作室 · 上海</div>
+      <h1 class="reveal">把复杂的想法，做成<em>清楚好用</em>的产品。</h1>
+      <p class="lede reveal">Aurora 是一支小而专注的设计与工程团队。我们为创业公司与成熟品牌构建品牌系统、网站与产品界面，从第一版原型一路做到上线。</p>
+      <div class="hero-actions reveal">
+        <a class="btn" href="#work">查看作品 <span class="arrow">↗</span></a>
+        <a class="btn ghost" href="#about">关于我们</a>
+      </div>
+      <div class="stats reveal">
+        <div class="stat"><div class="num serif">12<sup>+</sup></div><div class="lbl">已上线项目</div></div>
+        <div class="stat"><div class="num serif">8<sup>年</sup></div><div class="lbl">设计与工程经验</div></div>
+        <div class="stat"><div class="num serif">4</div><div class="lbl">长期合作客户</div></div>
+        <div class="stat"><div class="num serif">100<sup>%</sup></div><div class="lbl">交付即上线</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>品牌系统</span><span>网站设计</span><span>产品界面</span><span>设计工程</span><span>数据可视化</span><span>动效原型</span>
+      <span>品牌系统</span><span>网站设计</span><span>产品界面</span><span>设计工程</span><span>数据可视化</span><span>动效原型</span>
+    </div>
+  </div>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <div class="label mono"><span class="idx">01</span> 精选作品</div>
+          <h2 style="margin-top:18px">最近交付的四个项目</h2>
+        </div>
+        <p>从品牌到界面，每个项目都由设计与工程同一个人负责到底，减少沟通损耗。</p>
+      </div>
+
+      <div class="work-grid">
+        <article class="card reveal">
+          <div class="art art-a"><div class="glyph">LANTU</div><a class="go" href="#work" aria-label="查看项目">↗</a></div>
+          <div class="meta">
+            <div>
+              <h3>岚图 · 新能源数字展厅</h3>
+              <div class="tags"><span class="tag">品牌网站</span><span class="tag">3D 交互</span><span class="tag">前端开发</span></div>
+            </div>
+            <div class="yr">2025</div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="art art-b"><div class="glyph">Nimbus</div><a class="go" href="#work" aria-label="查看项目">↗</a></div>
+          <div class="meta">
+            <div>
+              <h3>Nimbus · 云端笔记</h3>
+              <div class="tags"><span class="tag">产品设计</span><span class="tag">设计系统</span><span class="tag">Web App</span></div>
+            </div>
+            <div class="yr">2025</div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="art art-c"><div class="glyph">Slow</div><a class="go" href="#work" aria-label="查看项目">↗</a></div>
+          <div class="meta">
+            <div>
+              <h3>慢咖啡 · 品牌电商</h3>
+              <div class="tags"><span class="tag">品牌识别</span><span class="tag">电商体验</span><span class="tag">包装</span></div>
+            </div>
+            <div class="yr">2024</div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="art art-d"><div class="glyph">Fintrack</div><a class="go" href="#work" aria-label="查看项目">↗</a></div>
+          <div class="meta">
+            <div>
+              <h3>Fintrack · 个人财务仪表盘</h3>
+              <div class="tags"><span class="tag">数据可视化</span><span class="tag">界面设计</span><span class="tag">可用性</span></div>
+            </div>
+            <div class="yr">2024</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" class="services">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <div class="label mono"><span class="idx">02</span> 我们做什么</div>
+          <h2 style="margin-top:18px">三件事，做得很深</h2>
+        </div>
+        <p>不做大而全的代理，只承接能够亲自完成的项目。</p>
+      </div>
+      <div class="svc-grid reveal">
+        <div class="svc">
+          <div class="n">01 / BRAND</div>
+          <h3>品牌与视觉</h3>
+          <p>从定位到视觉语言，建立一套能被长期使用的品牌资产。</p>
+          <ul><li>品牌识别与标志</li><li>视觉规范</li><li>包装与物料</li></ul>
+        </div>
+        <div class="svc">
+          <div class="n">02 / WEB</div>
+          <h3>网站设计与开发</h3>
+          <p>兼顾叙事与性能的官网与落地页，上线即可用，不牺牲加载速度。</p>
+          <ul><li>信息架构与文案</li><li>响应式界面</li><li>前端实现与部署</li></ul>
+        </div>
+        <div class="svc">
+          <div class="n">03 / PRODUCT</div>
+          <h3>产品界面系统</h3>
+          <p>把复杂业务拆成清晰的流程，沉淀成可复用的设计系统。</p>
+          <ul><li>用户流程与原型</li><li>组件与规范</li><li>设计与开发协作</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap about-grid">
+      <div class="reveal">
+        <div class="label mono" style="color:var(--ink-soft);margin-bottom:18px"><span class="idx" style="color:var(--accent)">03</span>&nbsp;关于我们</div>
+        <h2>两个人，<br>一条完整的交付链路。</h2>
+        <p>Aurora 由一名设计师和一名工程师组成。我们相信好的产品不需要层层转述——设计与实现由同一个人从头跟到尾，细节才不会被磨平。</p>
+        <p>我们与客户保持直接、坦诚的沟通，用短周期迭代代替冗长的提案，让每一次讨论都能落到可运行的东西上。</p>
+        <div class="about-quote">“把每一次交付，都当成会长期存在的作品来对待。”</div>
+      </div>
+      <div class="about-visual reveal" aria-hidden="true">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="core"></div>
+        <div class="caption">Est. 2018 — Shanghai</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="glow"></div>
+    <div class="wrap" style="position:relative">
+      <div class="mono reveal" style="color:var(--ink-soft)"><span style="color:var(--accent)">04</span> &nbsp;开始合作</div>
+      <h2 class="serif reveal">有个想法？<br>我们聊聊。</h2>
+      <p class="reveal">无论是一个新品牌、一次改版，还是一个还没想清楚的产品，都欢迎先聊一聊。通常我们会在两个工作日内回复。</p>
+      <div class="cta-row reveal">
+        <a class="btn" href="mailto:hello@aurora.studio">发送邮件 <span class="arrow">↗</span></a>
+        <a class="mail" href="mailto:hello@aurora.studio">hello@aurora.studio</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>© <span id="year">2026</span> Aurora Studio · 用设计与工程构建产品</div>
+    <div class="links">
+      <a href="#work">作品</a>
+      <a href="#services">服务</a>
+      <a href="#about">关于</a>
+      <a href="mailto:hello@aurora.studio">邮箱</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const header = document.getElementById('header');
+  const bar = document.getElementById('progress');
+
+  function onScroll(){
+    const y = window.scrollY || document.documentElement.scrollTop;
+    header.classList.toggle('scrolled', y > 8);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -40px 0px'});
+
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = (Math.min(i, 5) * 60) + 'ms';
+    io.observe(el);
+  });
+</script>
 </body>
 </html>
